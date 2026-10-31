@@ -76,3 +76,15 @@ It is read-only: nothing is modified, uploaded, extracted to disk, or installed.
 - Case-sensitive matching to cut false positives, with duplicate strings removed and a few added
 - Uptime shown for every running instance, along with its game folder
 - A launcher menu with an "Other" option for any mods folder
+
+## Android app
+
+There's also an Android version in [`android/`](android/). Download it here, on your phone:
+
+**[ModAnzer.apk](https://github.com/napatc1/ModAnzer/releases/download/apk/ModAnzer.apk)**
+
+Open the downloaded file to install it. Android will ask you to allow installs from your browser or file manager the first time.
+
+In the app, tap **Pick folder** and choose your mods folder, or a whole launcher or `.minecraft` folder; every mods folder inside it gets scanned. **Pick .jar files** checks individual jars instead. For PojavLauncher and similar launchers, open the picker's side menu (☰) and choose the launcher there. It does the same checks as the PC version: Modrinth and Megabase lookups by hash, then a cheat-string scan of unknown mods, including nested jars.
+
+GitHub builds the APK automatically whenever something in `android/` changes. The signing key in `android/app` is shared on purpose so new builds install over old ones. That also means it doesn't prove who built the APK, so only install it from this repo's release page.

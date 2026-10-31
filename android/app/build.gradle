@@ -1,0 +1,48 @@
+plugins {
+    id 'com.android.application'
+}
+
+def runNumber = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger()
+
+android {
+    namespace 'com.napatc1.modanzer'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.napatc1.modanzer"
+        minSdk 21
+        targetSdk 34
+        versionCode runNumber
+        versionName "1.0.${runNumber}"
+    }
+
+    // Shared key so each new build installs over the previous one.
+    signingConfigs {
+        shared {
+            storeFile file('modanzer.keystore')
+            storePassword 'modanzer'
+            keyAlias 'modanzer'
+            keyPassword 'modanzer'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.shared
+        }
+        debug {
+            signingConfig signingConfigs.shared
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    lint {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+}

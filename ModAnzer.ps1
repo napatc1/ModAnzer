@@ -215,61 +215,117 @@ if ($running.Count -gt 0) {
 
 $folders = New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
 
-if ($Path) {
-    foreach ($p in $Path) {
-        if (Test-Path -LiteralPath $p -PathType Container) { [void]$folders.Add((Resolve-Path -LiteralPath $p).ProviderPath) }
-        else { Write-Host "Not a folder: $p" -ForegroundColor Red }
-    }
-} else {
-    Write-Host '[*] Looking for mods folders...' -ForegroundColor Yellow
+function Fix-Sep([string]$p) { return $p.Replace('\', [IO.Path]::DirectorySeparatorChar) }
 
-    $roots = New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
-    $home_ = $env:USERPROFILE
+$home_ = $env:USERPROFILE
+$Launchers = @(
+    @{ Name = 'Minecraft Launcher (.minecraft, Badlion, SKLauncher)'; Roots = @("$env:APPDATA\.minecraft") },
+    @{ Name = 'CurseForge';            Roots = @("$home_\curseforge\minecraft\Instances", "$home_\Documents\curseforge\minecraft\Instances", "$home_\Twitch\Minecraft\Instances") },
+    @{ Name = 'Modrinth App';          Roots = @("$env:APPDATA\ModrinthApp", "$env:APPDATA\com.modrinth.theseus") },
+    @{ Name = 'Prism / MultiMC / PolyMC'; Roots = @("$env:APPDATA\PrismLauncher", "$env:APPDATA\PolyMC", "$env:LOCALAPPDATA\Programs\PrismLauncher", "$env:LOCALAPPDATA\Programs\MultiMC") },
+    @{ Name = 'ATLauncher';            Roots = @("$env:APPDATA\ATLauncher") },
+    @{ Name = 'GDLauncher';            Roots = @("$env:APPDATA\gdlauncher_next", "$env:APPDATA\gdlauncher_carbon") },
+    @{ Name = 'Lunar Client';          Roots = @("$home_\.lunarclient") },
+    @{ Name = 'Feather Client';        Roots = @("$env:APPDATA\.feather") },
+    @{ Name = 'TLauncher';             Roots = @("$env:APPDATA\.tlauncher", "$env:APPDATA\.minecraft") },
+    @{ Name = 'Technic';               Roots = @("$env:APPDATA\.technic") }
+)
 
-    # Known launcher locations
-    $known = @(
-        "$env:APPDATA\.minecraft",
-        "$env:APPDATA\ModrinthApp",
-        "$env:APPDATA\com.modrinth.theseus",
-        "$env:APPDATA\PrismLauncher",
-        "$env:APPDATA\PolyMC",
-        "$env:APPDATA\ATLauncher",
-        "$env:APPDATA\gdlauncher_next",
-        "$env:APPDATA\gdlauncher_carbon",
-        "$env:APPDATA\.technic",
-        "$env:APPDATA\.feather",
-        "$env:APPDATA\.tlauncher",
-        "$home_\curseforge\minecraft\Instances",
-        "$home_\Documents\curseforge\minecraft\Instances",
-        "$home_\Twitch\Minecraft\Instances",
-        "$home_\.lunarclient",
-        "$env:LOCALAPPDATA\Programs\PrismLauncher",
-        "$env:LOCALAPPDATA\Programs\MultiMC"
-    )
-    foreach ($k in $known) {
-        $k = $k.Replace('\', [IO.Path]::DirectorySeparatorChar)
-        if ($k -and (Test-Path -LiteralPath $k)) { [void]$roots.Add($k) }
-    }
-
-    # Microsoft Store launcher
-    Get-ChildItem -Path "$env:LOCALAPPDATA\Packages" -Directory -Filter 'Microsoft.4297127D64EC6_*' -ErrorAction SilentlyContinue |
-        ForEach-Object { $mc = Join-Path $_.FullName 'LocalCache\Roaming\.minecraft'; if (Test-Path $mc) { [void]$roots.Add($mc) } }
-
-    # Any dot-folder in AppData\Roaming or the user folder (.dawn, .badlion, other clients)
-    foreach ($base in @($env:APPDATA, $home_)) {
-        if (-not $base) { continue }
-        Get-ChildItem -LiteralPath $base -Directory -Force -ErrorAction SilentlyContinue |
-            Where-Object { $_.Name.StartsWith('.') -and ($SkipDirs -notcontains $_.Name.ToLowerInvariant()) } |
-            ForEach-Object { [void]$roots.Add($_.FullName) }
-    }
-
-    # Running game directories
-    foreach ($r in $running) { if (Test-Path -LiteralPath $r.Dir) { [void]$roots.Add($r.Dir) } }
-
-    foreach ($root in $roots) {
+# Add the mods folders found under each root
+function Add-FromRoots($rootList) {
+    foreach ($root in $rootList) {
+        if (-not $root) { continue }
+        $root = Fix-Sep $root
+        if (-not (Test-Path -LiteralPath $root -PathType Container)) { continue }
         $leaf = [IO.Path]::GetFileName($root.TrimEnd('\', '/'))
         if ($ModFolderNames -contains $leaf.ToLowerInvariant()) { [void]$folders.Add($root); continue }
         foreach ($f in (Find-ModFolders $root)) { [void]$folders.Add($f) }
+    }
+}
+
+# A folder the user typed: use it if it holds jars, otherwise look for mods folders inside it
+function Add-UserFolder([string]$p) {
+    $p = $p.Trim().Trim('"').Trim("'")
+    if ($p -and -not (Test-Path -LiteralPath $p -PathType Container) -and (Test-Path -LiteralPath (Fix-Sep $p) -PathType Container)) { $p = Fix-Sep $p }
+    if (-not $p -or -not (Test-Path -LiteralPath $p -PathType Container)) { return $false }
+    $p = (Resolve-Path -LiteralPath $p).ProviderPath
+    $before = $folders.Count
+    if (Get-ChildItem -LiteralPath $p -Filter *.jar -File -Recurse -Depth 1 -ErrorAction SilentlyContinue | Select-Object -First 1) {
+        [void]$folders.Add($p)
+    }
+    foreach ($f in (Find-ModFolders $p)) { [void]$folders.Add($f) }
+    if ($folders.Count -eq $before) { [void]$folders.Add($p) }
+    return $true
+}
+
+if ($Path) {
+    foreach ($p in $Path) {
+        if (-not (Add-UserFolder $p)) { Write-Host "Not a folder: $p" -ForegroundColor Red }
+    }
+} else {
+    $otherNum = $Launchers.Count + 2
+    Write-Host 'Which launcher do you use?' -ForegroundColor White
+    Write-Host '  1) ' -ForegroundColor Yellow -NoNewline; Write-Host 'Scan everything (auto-detect)  ' -NoNewline; Write-Host '[default]' -ForegroundColor DarkGray
+    for ($n = 0; $n -lt $Launchers.Count; $n++) {
+        Write-Host ('{0,3}) ' -f ($n + 2)) -ForegroundColor Yellow -NoNewline; Write-Host $Launchers[$n].Name
+    }
+    Write-Host ('{0,3}) ' -f $otherNum) -ForegroundColor Yellow -NoNewline; Write-Host 'Other (type the path to your mods folder)'
+    Write-Host
+
+    $choice = $null
+    while ($null -eq $choice) {
+        $in = (Read-Host "Choose 1-$otherNum").Trim()
+        if ($in -eq '') { $in = '1' }
+        $num = 0
+        if ([int]::TryParse($in, [ref]$num) -and $num -ge 1 -and $num -le $otherNum) { $choice = $num }
+        else { Write-Host "Type a number from 1 to $otherNum." -ForegroundColor Red }
+    }
+    Write-Host
+
+    if ($choice -eq $otherNum) {
+        while ($true) {
+            $typed = Read-Host 'Path to the mods folder'
+            if (Add-UserFolder $typed) { break }
+            Write-Host 'That folder does not exist. Try again (you can paste it from File Explorer).' -ForegroundColor Red
+        }
+    } elseif ($choice -ge 2) {
+        $pick = $Launchers[$choice - 2]
+        Write-Host "[*] Looking for $($pick.Name) mods folders..." -ForegroundColor Yellow -NoNewline
+        Add-FromRoots $pick.Roots
+        if ($folders.Count -eq 0) {
+            Write-Host "`r$(' ' * 70)`r" -NoNewline
+            Write-Host "No $($pick.Name) mods folder found in the usual place." -ForegroundColor Red
+            while ($true) {
+                $typed = Read-Host 'Paste the path to your mods folder (or press Enter to scan everything)'
+                if (-not $typed.Trim()) { $choice = 1; break }
+                if (Add-UserFolder $typed) { break }
+                Write-Host 'That folder does not exist. Try again.' -ForegroundColor Red
+            }
+        }
+    }
+
+    if ($choice -eq 1) {
+        Write-Host '[*] Looking for mods folders...' -ForegroundColor Yellow -NoNewline
+        $all = @()
+        foreach ($l in $Launchers) { $all += $l.Roots }
+
+        # Microsoft Store launcher
+        Get-ChildItem -Path (Fix-Sep "$env:LOCALAPPDATA\Packages") -Directory -Filter 'Microsoft.4297127D64EC6_*' -ErrorAction SilentlyContinue |
+            ForEach-Object { $all += (Join-Path $_.FullName 'LocalCache\Roaming\.minecraft') }
+
+        # Any dot-folder in AppData\Roaming or the user folder (.dawn, .badlion, other clients)
+        foreach ($base in @($env:APPDATA, $home_)) {
+            if (-not $base) { continue }
+            Get-ChildItem -LiteralPath $base -Directory -Force -ErrorAction SilentlyContinue |
+                Where-Object { $_.Name.StartsWith('.') -and ($SkipDirs -notcontains $_.Name.ToLowerInvariant()) } |
+                ForEach-Object { $all += $_.FullName }
+        }
+
+        # Running game directories
+        foreach ($r in $running) { $all += $r.Dir }
+
+        $seen = New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
+        Add-FromRoots (@($all | Where-Object { $_ -and $seen.Add((Fix-Sep $_)) }))
     }
 }
 

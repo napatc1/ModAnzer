@@ -18,11 +18,30 @@ Safer option: download `ModAnzer.ps1`, read it, then run your local copy:
 powershell -ExecutionPolicy Bypass -File .\ModAnzer.ps1
 ```
 
+When it starts, it asks which launcher you use:
+
+```
+  1) Scan everything (auto-detect)  [default]
+  2) Minecraft Launcher (.minecraft, Badlion, SKLauncher)
+  3) CurseForge
+  4) Modrinth App
+  5) Prism / MultiMC / PolyMC
+  6) ATLauncher
+  7) GDLauncher
+  8) Lunar Client
+  9) Feather Client
+ 10) TLauncher
+ 11) Technic
+ 12) Other (type the path to your mods folder)
+```
+
+Press Enter for 1. If the launcher you pick has no mods folder in its usual place, it asks you to paste the path, or press Enter to scan everything.
+
 ### Options
 
 | Option | What it does |
 |---|---|
-| `-Path "D:\pack\mods"` | Scan only these folders (can list several, comma-separated) |
+| `-Path "D:\pack\mods"` | Skip the menu and scan only these folders (can list several, comma-separated) |
 | `-Offline` | Skip the online lookups; only do the cheat-string scan |
 
 ## Where it looks
@@ -56,3 +75,4 @@ It is read-only: nothing is modified, uploaded, extracted to disk, or installed.
 - In-memory scanning with no temp folder, and nested jars inside nested jars
 - Case-sensitive matching to cut false positives, with duplicate strings removed and a few added
 - Uptime shown for every running instance, along with its game folder
+- A launcher menu with an "Other" option for any mods folder

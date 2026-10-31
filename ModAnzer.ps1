@@ -8,8 +8,8 @@
 
     What it does:
       * Auto-detects mods folders for vanilla .minecraft, CurseForge, Modrinth App,
-        Prism / PolyMC / MultiMC, ATLauncher, GDLauncher, Technic, Feather, Lunar,
-        and any "dot" client folder (.dawn, .badlion, ...) - no path pasting needed.
+        Prism / PolyMC / MultiMC, ATLauncher, GDLauncher, Technic, Dawn (Feather), Lunar,
+        and any "dot" client folder (.badlion, ...) - no path pasting needed.
       * Also picks up the game folder of any Minecraft that is running right now.
       * Hashes each .jar (SHA1) and looks the hashes up on Modrinth (batched) and
         Megabase. Only hashes are sent - never your files.
@@ -95,7 +95,7 @@ function Get-LauncherName([string]$p) {
         'atlauncher'                 { return 'ATLauncher' }
         'gdlauncher'                 { return 'GDLauncher' }
         '\\\.technic\\'              { return 'Technic' }
-        '\\\.feather\\'              { return 'Feather' }
+        '\\\.(dawn|feather)\\'       { return 'Dawn' }
         '\\\.lunarclient\\'          { return 'Lunar' }
         '\\\.tlauncher\\'            { return 'TLauncher' }
         '\\\.minecraft\\'            { return 'Minecraft' }
@@ -226,7 +226,7 @@ $Launchers = @(
     @{ Name = 'ATLauncher';            Roots = @("$env:APPDATA\ATLauncher") },
     @{ Name = 'GDLauncher';            Roots = @("$env:APPDATA\gdlauncher_next", "$env:APPDATA\gdlauncher_carbon") },
     @{ Name = 'Lunar Client';          Roots = @("$home_\.lunarclient") },
-    @{ Name = 'Feather Client';        Roots = @("$env:APPDATA\.feather") },
+    @{ Name = 'Dawn Client (formerly Feather)'; Roots = @("$env:APPDATA\.dawn", "$home_\.dawn", "$env:APPDATA\.feather") },
     @{ Name = 'TLauncher';             Roots = @("$env:APPDATA\.tlauncher", "$env:APPDATA\.minecraft") },
     @{ Name = 'Technic';               Roots = @("$env:APPDATA\.technic") }
 )

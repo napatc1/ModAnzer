@@ -29,7 +29,7 @@ When it starts, it asks which launcher you use:
   6) ATLauncher
   7) GDLauncher
   8) Lunar Client
-  9) Feather Client
+  9) Dawn Client (formerly Feather)
  10) TLauncher
  11) Technic
  12) Other (type the path to your mods folder)
@@ -50,8 +50,8 @@ Press Enter for 1. If the launcher you pick has no mods folder in its usual plac
 - CurseForge: `~\curseforge\minecraft\Instances\*`
 - Modrinth App: `%APPDATA%\ModrinthApp\profiles\*`
 - Prism, PolyMC, MultiMC, ATLauncher, GDLauncher, Technic
-- Feather (`user-mods`), Lunar, TLauncher
-- Any dot-folder in `%APPDATA%` or your user folder, such as `.dawn` or `.badlion`
+- Dawn, formerly Feather (`%APPDATA%\.dawn`, and `.feather` with its `user-mods` folder), Lunar, TLauncher
+- Any dot-folder in `%APPDATA%` or your user folder, such as `.badlion`
 - The game folder of any Minecraft that is running right now (read from `--gameDir`)
 
 Jars in one level of subfolders (for example `mods\1.21\`) are included too.

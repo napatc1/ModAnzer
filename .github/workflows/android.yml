@@ -6,6 +6,7 @@ on:
     paths:
       - 'android/**'
       - 'ModAnzer.ps1'
+      - 'ModAnzer.ico'
       - '.github/workflows/android.yml'
   workflow_dispatch:
 
@@ -50,13 +51,14 @@ jobs:
         run: |
           rm -f "$RUNNER_TEMP/modanzer.jks"
           cp android/app/build/outputs/apk/release/app-release.apk ModAnzer.apk
-          sha256sum ModAnzer.apk ModAnzer.ps1 > SHA256SUMS.txt
+          sha256sum ModAnzer.apk ModAnzer.ps1 ModAnzer.ico > SHA256SUMS.txt
           cat SHA256SUMS.txt
           {
             echo "ModAnzer build #${{ github.run_number }} from commit ${{ github.sha }}."
             echo
             echo "- **ModAnzer.apk**: Android app. Open it on your phone to install."
             echo "- **ModAnzer.ps1**: Windows script. See the README for how to run it."
+            echo "- **ModAnzer.ico**: icon for a desktop shortcut to the script."
             echo
             echo "SHA256 checksums:"
             echo '```'
@@ -64,7 +66,7 @@ jobs:
             echo '```'
           } > notes.md
           gh release delete apk --yes --cleanup-tag || true
-          gh release create apk ModAnzer.apk ModAnzer.ps1 SHA256SUMS.txt \
+          gh release create apk ModAnzer.apk ModAnzer.ps1 ModAnzer.ico SHA256SUMS.txt \
             --target "${{ github.sha }}" \
             --title "ModAnzer (Android + Windows)" \
             --notes-file notes.md

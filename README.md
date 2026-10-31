@@ -18,6 +18,20 @@ powershell -NoProfile -ExecutionPolicy RemoteSigned -File .\ModAnzer.ps1
 
 Please don't run it with a pasted `irm ... | iex` one-liner. Downloading code and running it straight from memory with the execution policy bypassed is exactly how malware gets in, so antivirus tools watch for that pattern and may block or flag it. Running a saved file avoids that, and you can read the file before running it.
 
+### Desktop shortcut
+
+To start it with a double-click, download **[ModAnzer.ico](https://github.com/napatc1/ModAnzer/releases/download/apk/ModAnzer.ico)** and put it next to `ModAnzer.ps1`. Then:
+
+1. Right-click the desktop and choose **New → Shortcut**.
+2. For the location, enter the following, changing the path to where you saved the script:
+   ```
+   powershell.exe -NoProfile -ExecutionPolicy RemoteSigned -File "C:\Users\you\Downloads\ModAnzer\ModAnzer.ps1"
+   ```
+3. Name it **ModAnzer** and click **Finish**.
+4. Right-click the shortcut and choose **Properties → Change Icon → Browse**, then pick `ModAnzer.ico`.
+
+Make the shortcut on each PC rather than sending a `.lnk` file to someone. A shortcut only points to files on the PC it was made on, so the receiver gets a broken shortcut with no icon. Discord and antivirus tools also often block shortcut files that start PowerShell, because malware spreads that way. To share it, send the [release page](https://github.com/napatc1/ModAnzer/releases/tag/apk) link instead.
+
 When it starts, it first shows what it does and doesn't do, and waits for you to press Enter. Then it asks which launcher you use:
 
 ```

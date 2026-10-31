@@ -140,8 +140,12 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Draw behind the system bars on every Android version (Android 15+ always does)
+        // and pad the content by the bar sizes, so the layout is the same everywhere.
         getWindow().setStatusBarColor(BG);
         getWindow().setNavigationBarColor(BG);
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
 
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -203,6 +207,12 @@ public class MainActivity extends Activity {
         root.addView(scroll);
 
         setContentView(root);
+        root.setOnApplyWindowInsetsListener((v, insets) -> {
+            v.setPadding(dp(16) + insets.getSystemWindowInsetLeft(), dp(20) + insets.getSystemWindowInsetTop(),
+                    dp(16) + insets.getSystemWindowInsetRight(), dp(12) + insets.getSystemWindowInsetBottom());
+            return insets;
+        });
+        root.requestApplyInsets();
 
         bFolder.setOnClickListener(v -> {
             if (busy) return;

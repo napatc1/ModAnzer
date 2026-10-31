@@ -1,10 +1,11 @@
-name: Build Android APK
+name: Build release
 
 on:
   push:
     branches: [main]
     paths:
       - 'android/**'
+      - 'ModAnzer.ps1'
       - '.github/workflows/android.yml'
   workflow_dispatch:
 
@@ -26,16 +27,44 @@ jobs:
         with:
           gradle-version: '8.9'
 
+      - name: Load signing key
+        env:
+          KEYSTORE_B64: ${{ secrets.MODANZER_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/modanzer.jks"
+            echo "MODANZER_KEYSTORE_FILE=$RUNNER_TEMP/modanzer.jks" >> "$GITHUB_ENV"
+            echo "Signing with the private release key."
+          else
+            echo "::warning::MODANZER_KEYSTORE_BASE64 secret not set - signing with a temporary debug key."
+          fi
+
       - name: Build APK
+        env:
+          MODANZER_KEYSTORE_PASSWORD: ${{ secrets.MODANZER_KEYSTORE_PASSWORD }}
         run: gradle -p android assembleRelease --no-daemon
 
       - name: Publish to the "apk" release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          rm -f "$RUNNER_TEMP/modanzer.jks"
           cp android/app/build/outputs/apk/release/app-release.apk ModAnzer.apk
+          sha256sum ModAnzer.apk ModAnzer.ps1 > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+          {
+            echo "ModAnzer build #${{ github.run_number }} from commit ${{ github.sha }}."
+            echo
+            echo "- **ModAnzer.apk**: Android app. Open it on your phone to install."
+            echo "- **ModAnzer.ps1**: Windows script. See the README for how to run it."
+            echo
+            echo "SHA256 checksums:"
+            echo '```'
+            cat SHA256SUMS.txt
+            echo '```'
+          } > notes.md
           gh release delete apk --yes --cleanup-tag || true
-          gh release create apk ModAnzer.apk \
+          gh release create apk ModAnzer.apk ModAnzer.ps1 SHA256SUMS.txt \
             --target "${{ github.sha }}" \
-            --title "ModAnzer for Android" \
-            --notes "Latest Android build (run #${{ github.run_number }}). Download ModAnzer.apk on your phone and install it."
+            --title "ModAnzer (Android + Windows)" \
+            --notes-file notes.md

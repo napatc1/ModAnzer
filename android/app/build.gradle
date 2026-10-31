@@ -6,33 +6,35 @@ def runNumber = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger()
 
 android {
     namespace 'com.napatc1.modanzer'
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         applicationId "com.napatc1.modanzer"
         minSdk 21
-        targetSdk 34
+        targetSdk 35
         versionCode runNumber
         versionName "1.0.${runNumber}"
     }
 
-    // Shared key so each new build installs over the previous one.
+    // Release builds are signed with the private key from the GitHub secrets
+    // (MODANZER_KEYSTORE_BASE64 / MODANZER_KEYSTORE_PASSWORD). Without them the
+    // build falls back to a temporary debug key, which can't update an existing install.
+    def ksPath = System.getenv("MODANZER_KEYSTORE_FILE")
     signingConfigs {
-        shared {
-            storeFile file('modanzer.keystore')
-            storePassword 'modanzer'
-            keyAlias 'modanzer'
-            keyPassword 'modanzer'
+        if (ksPath) {
+            release {
+                storeFile file(ksPath)
+                storePassword System.getenv("MODANZER_KEYSTORE_PASSWORD")
+                keyAlias System.getenv("MODANZER_KEY_ALIAS") ?: 'modanzer'
+                keyPassword System.getenv("MODANZER_KEYSTORE_PASSWORD")
+            }
         }
     }
 
     buildTypes {
         release {
             minifyEnabled false
-            signingConfig signingConfigs.shared
-        }
-        debug {
-            signingConfig signingConfigs.shared
+            signingConfig ksPath ? signingConfigs.release : signingConfigs.debug
         }
     }
 

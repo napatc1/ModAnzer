@@ -83,6 +83,14 @@ public class MainActivity extends Activity {
         CHEAT_RE = Pattern.compile(b.toString());
     }
 
+    // Mods known to be safe even though their code contains a cheat-like name.
+    // Matched by exact SHA1 (lowercase) so a renamed cheat can't pretend to be one.
+    // Keep in sync with $TrustedMods in ModAnzer.ps1.
+    private static final Map<String, String> TRUSTED = new HashMap<>();
+    static {
+        // TRUSTED.put("sha1-in-lowercase", "Name");
+    }
+
     private static final Set<String> MOD_DIRS = new HashSet<>(Arrays.asList("mods", "user-mods"));
     private static final Set<String> SKIP_DIRS = new HashSet<>(Arrays.asList(
             ".git", ".gradle", ".cache", "assets", "libraries", "versions", "logs",
@@ -437,6 +445,10 @@ public class MainActivity extends Activity {
             if (name != null) known.put(left.get(i), name);
         }
 
+        for (String h : hashes) {
+            if (TRUSTED.containsKey(h)) known.put(h, TRUSTED.get(h) + " (trusted)");
+        }
+
         // 3. scan unknown
         Map<String, List<String[]>> hits = new HashMap<>();
         List<String> unknown = new ArrayList<>();
@@ -486,6 +498,7 @@ public class MainActivity extends Activity {
                         append(sb, "     " + hit[0] + ": ", C_DIM, false);
                         append(sb, hit[1] + "\n", C_HIT, false);
                     }
+                    append(sb, "     sha1: " + j.hash + "\n", C_DIM, false);
                 } else {
                     unk++;
                     append(sb, " ??  " + j.name + "\n", C_UNK, false);

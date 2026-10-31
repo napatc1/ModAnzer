@@ -72,6 +72,13 @@ $CheatStrings = @(
 )
 $CheatRegex = [regex]::new(($CheatStrings | ForEach-Object { [regex]::Escape($_) }) -join '|')
 
+# Mods known to be safe even though their code contains a cheat-like name (for example a
+# HUD that shows "AutoTotem" status). Matched by exact SHA1 so a renamed cheat can't
+# pretend to be one of them. Add entries as  'sha1-in-lowercase' = 'Name'
+# (the SHA1 is printed under every [CHEAT] result).
+$TrustedMods = @{
+}
+
 # Folder names that hold mods
 $ModFolderNames = @('mods', 'user-mods')
 
@@ -116,6 +123,7 @@ function Get-LauncherName([string]$p) {
         '\\\.technic\\'              { return 'Technic' }
         '\\\.(dawn|feather)\\'       { return 'Dawn' }
         '\\\.lunarclient\\'          { return 'Lunar' }
+        'fastclient'                 { return 'Fast Client' }
         '\\\.tlauncher\\'            { return 'TLauncher' }
         '\\\.minecraft\\'            { return 'Minecraft' }
         '\\\.([^\\]+)\\'             { return ".$($Matches[1])" }
@@ -274,6 +282,7 @@ $Launchers = @(
     @{ Name = 'GDLauncher';            Roots = @("$env:APPDATA\gdlauncher_next", "$env:APPDATA\gdlauncher_carbon") },
     @{ Name = 'Lunar Client';          Roots = @("$home_\.lunarclient") },
     @{ Name = 'Dawn Client (formerly Feather)'; Roots = @("$env:APPDATA\.dawn", "$home_\.dawn", "$env:APPDATA\.feather") },
+    @{ Name = 'Fast Client';           Roots = @("$env:APPDATA\.fastclient", "$home_\.fastclient", "$env:APPDATA\FastClient", "$env:LOCALAPPDATA\FastClient", "$env:LOCALAPPDATA\Programs\FastClient") },
     @{ Name = 'TLauncher';             Roots = @("$env:APPDATA\.tlauncher", "$env:APPDATA\.minecraft") },
     @{ Name = 'Technic';               Roots = @("$env:APPDATA\.technic") }
 )
@@ -459,6 +468,10 @@ if (-not $Offline -and $hashes.Count -gt 0) {
     }
 }
 
+foreach ($h in $hashes) {
+    if ($TrustedMods.ContainsKey($h)) { $known[$h] = "$($TrustedMods[$h]) (trusted)" }
+}
+
 # ---------------------------------------------------------------- 4. scan unknown jars
 
 $scanned = @{}   # hash -> list of hits
@@ -505,6 +518,7 @@ foreach ($f in $withJars) {
                 Write-Host "          $($hit.Where): " -ForegroundColor Gray -NoNewline
                 Write-Host ($hit.Strings -join ', ') -ForegroundColor Magenta
             }
+            Write-Host "          sha1: $($j.Hash)" -ForegroundColor DarkGray
         } else {
             $totalUnknown++
             Write-Host "  [?]     $name" -ForegroundColor DarkYellow

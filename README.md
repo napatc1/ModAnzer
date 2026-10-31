@@ -48,9 +48,10 @@ When it starts, it first shows what it does and doesn't do, and waits for you to
   7) GDLauncher
   8) Lunar Client
   9) Dawn Client (formerly Feather)
- 10) TLauncher
- 11) Technic
- 12) Other (type the path to your mods folder)
+ 10) Fast Client
+ 11) TLauncher
+ 12) Technic
+ 13) Other (type the path to your mods folder)
 ```
 
 Press Enter for 1. If the launcher you pick has no mods folder in its usual place, it asks you to paste the path, or press Enter to scan everything.
@@ -70,6 +71,7 @@ Press Enter for 1. If the launcher you pick has no mods folder in its usual plac
 - CurseForge: `~\curseforge\minecraft\Instances\*`
 - Modrinth App: `%APPDATA%\ModrinthApp\profiles\*`
 - Prism, PolyMC, MultiMC, ATLauncher, GDLauncher, Technic
+- Fast Client (`%APPDATA%\.fastclient` and similar)
 - Dawn, formerly Feather (`%APPDATA%\.dawn`, and `.feather` with its `user-mods` folder), Lunar, TLauncher
 - Any dot-folder in `%APPDATA%` or your user folder, such as `.badlion`
 - The game folder of any Minecraft that is running right now (read from `--gameDir`)

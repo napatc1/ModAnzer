@@ -202,7 +202,7 @@ public class MainActivity extends Activity {
         output.setPadding(dp(12), dp(12), dp(12), dp(12));
         output.setTextIsSelectable(true);
         output.setGravity(Gravity.TOP);
-        output.setText("Results will show here.");
+        output.setText(intro());
         scroll.addView(output);
         root.addView(scroll);
 
@@ -305,6 +305,26 @@ public class MainActivity extends Activity {
         sb.append(text);
         sb.setSpan(new ForegroundColorSpan(color), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         if (bold) sb.setSpan(new StyleSpan(Typeface.BOLD), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+    }
+
+    // What the app does and doesn't do, shown before the first scan.
+    private static CharSequence intro() {
+        SpannableStringBuilder sb = new SpannableStringBuilder();
+        append(sb, "This is NOT a hacking or malware tool. It is read-only and only:\n", C_TEXT, true);
+        append(sb, " - Reads the mods folder or .jar files you pick\n"
+                + " - Makes a fingerprint (SHA1 hash) of each mod\n"
+                + " - Looks those fingerprints up on Modrinth and Megabase to name your mods\n"
+                + " - Searches mods it doesn't recognise for known cheat names\n"
+                + " - Shows the results on this screen\n\n", C_DIM, false);
+        append(sb, "It does NOT:\n", C_TEXT, true);
+        append(sb, " - Upload your files, or send anything except the mod fingerprints\n"
+                + " - Look at anything you didn't pick\n"
+                + " - Read passwords, accounts, contacts, photos or messages\n"
+                + " - Change, move or delete any files\n"
+                + " - Ask for any permission except Internet\n\n", C_DIM, false);
+        append(sb, "Source code: github.com/napatc1/ModAnzer\n\n", C_DIM, false);
+        append(sb, "Tap Pick folder or Pick .jar files to start.", 0xFFFFD54F, true);
+        return sb;
     }
 
     // ------------------------------------------------------------------ finding jars

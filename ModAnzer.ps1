@@ -24,6 +24,9 @@
 .PARAMETER Offline
     Skip the online lookups and only do the cheat-string scan.
 
+.PARAMETER SkipIntro
+    Don't show the "what this script does" notice or wait for Enter.
+
 .EXAMPLE
     .\ModAnzer.ps1
 .EXAMPLE
@@ -32,7 +35,8 @@
 [CmdletBinding()]
 param(
     [string[]]$Path,
-    [switch]$Offline
+    [switch]$Offline,
+    [switch]$SkipIntro
 )
 
 $ErrorActionPreference = 'Stop'
@@ -197,6 +201,27 @@ Clear-Host
 Write-Host 'ModAnzer' -ForegroundColor Yellow -NoNewline
 Write-Host '  - Minecraft mod analyzer (based on HabibiModAnalyzer by HadronCollision)' -ForegroundColor DarkGray
 Write-Host
+
+if (-not $SkipIntro) {
+    Write-Host 'This is NOT a hacking or malware tool. It is read-only and only:' -ForegroundColor White
+    Write-Host '  - Finds your Minecraft mods folders (or the one you choose)' -ForegroundColor Gray
+    Write-Host '  - Checks which Minecraft is running and how long it has been open' -ForegroundColor Gray
+    Write-Host '  - Makes a fingerprint (SHA1 hash) of each .jar mod file' -ForegroundColor Gray
+    Write-Host '  - Looks those fingerprints up on Modrinth and Megabase to name your mods' -ForegroundColor Gray
+    Write-Host '  - Searches mods it does not recognise for known cheat names' -ForegroundColor Gray
+    Write-Host '  - Shows the results on this screen' -ForegroundColor Gray
+    Write-Host
+    Write-Host 'It does NOT:' -ForegroundColor White
+    Write-Host '  - Upload your files, or send anything except the mod fingerprints' -ForegroundColor Gray
+    Write-Host '  - Read passwords, tokens, browser data, Discord or launcher accounts' -ForegroundColor Gray
+    Write-Host '  - Change, move or delete any files' -ForegroundColor Gray
+    Write-Host '  - Install anything or change any settings' -ForegroundColor Gray
+    Write-Host
+    Write-Host 'Source code: https://github.com/napatc1/ModAnzer' -ForegroundColor DarkGray
+    Write-Host
+    Read-Host 'Press Enter to start (or Ctrl+C to quit)' | Out-Null
+    Write-Host
+}
 
 $running = @(Get-RunningGameDirs)
 if ($running.Count -gt 0) {

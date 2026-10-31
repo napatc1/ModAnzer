@@ -18,7 +18,7 @@ powershell -NoProfile -ExecutionPolicy RemoteSigned -File .\ModAnzer.ps1
 
 Please don't run it with a pasted `irm ... | iex` one-liner. Downloading code and running it straight from memory with the execution policy bypassed is exactly how malware gets in, so antivirus tools watch for that pattern and may block or flag it. Running a saved file avoids that, and you can read the file before running it.
 
-When it starts, it asks which launcher you use:
+When it starts, it first shows what it does and doesn't do, and waits for you to press Enter. Then it asks which launcher you use:
 
 ```
   1) Scan everything (auto-detect)  [default]
@@ -43,6 +43,7 @@ Press Enter for 1. If the launcher you pick has no mods folder in its usual plac
 |---|---|
 | `-Path "D:\pack\mods"` | Skip the menu and scan only these folders (can list several, comma-separated) |
 | `-Offline` | Skip the online lookups; only do the cheat-string scan |
+| `-SkipIntro` | Don't show the "what this script does" notice at the start |
 
 ## Where it looks
 

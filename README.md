@@ -6,6 +6,10 @@ Based on [HabibiModAnalyzer](https://github.com/HadronCollision/PowershellScript
 
 ## Run it
 
+**Easiest way:** download `ModAnzer.ps1`, right-click it and choose **Run with PowerShell**. If Windows asks whether to run a downloaded script, choose **Run once**. The window stays open at the end until you press Enter.
+
+**From a PowerShell window:**
+
 1. Download **[ModAnzer.ps1](https://github.com/napatc1/ModAnzer/releases/download/apk/ModAnzer.ps1)** from the latest release. If you like, check it against `SHA256SUMS.txt` on the [release page](https://github.com/napatc1/ModAnzer/releases/tag/apk).
 2. Open PowerShell in the folder you saved it to and run:
 
@@ -58,6 +62,7 @@ Press Enter for 1. If the launcher you pick has no mods folder in its usual plac
 | `-Path "D:\pack\mods"` | Skip the menu and scan only these folders (can list several, comma-separated) |
 | `-Offline` | Skip the online lookups; only do the cheat-string scan |
 | `-SkipIntro` | Don't show the "what this script does" notice at the start |
+| `-NoPause` | Don't wait for Enter before closing at the end |
 
 ## Where it looks
 

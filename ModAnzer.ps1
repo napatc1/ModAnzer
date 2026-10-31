@@ -27,6 +27,10 @@
 .PARAMETER SkipIntro
     Don't show the "what this script does" notice or wait for Enter.
 
+.PARAMETER NoPause
+    Don't wait for Enter at the end (by default it waits, so the window
+    stays open when started with right-click > Run with PowerShell).
+
 .EXAMPLE
     .\ModAnzer.ps1
 .EXAMPLE
@@ -36,7 +40,8 @@
 param(
     [string[]]$Path,
     [switch]$Offline,
-    [switch]$SkipIntro
+    [switch]$SkipIntro,
+    [switch]$NoPause
 )
 
 $ErrorActionPreference = 'Stop'
@@ -187,6 +192,13 @@ function Search-Jar([IO.Stream]$stream, [string]$label, [System.Collections.Gene
             $hits.Add([PSCustomObject]@{ Where = $label; Strings = (@($found) | Sort-Object) })
         }
     } finally { $zip.Dispose() }
+}
+
+function Wait-BeforeClose {
+    if (-not $NoPause) {
+        Write-Host
+        Read-Host 'Press Enter to close' | Out-Null
+    }
 }
 
 function Invoke-Json([string]$uri, [string]$method = 'Get', $body = $null) {
@@ -368,7 +380,8 @@ $withJars = @($jars | Select-Object -ExpandProperty Folder -Unique)
 
 if ($withJars.Count -eq 0) {
     Write-Host 'No mods found.' -ForegroundColor Red
-    Write-Host 'If your launcher keeps mods somewhere unusual, run:  .\ModAnzer.ps1 -Path "<your mods folder>"' -ForegroundColor DarkGray
+    Write-Host 'Run it again and choose "Other" to type the path to your mods folder.' -ForegroundColor DarkGray
+    Wait-BeforeClose
     exit 1
 }
 
@@ -499,3 +512,4 @@ Write-Host "  Cheat:    $totalCheat"   -ForegroundColor $(if ($totalCheat -gt 0)
 if ($Offline) { Write-Host '  (offline mode - no online lookups were made)' -ForegroundColor DarkGray }
 Write-Host
 Write-Host 'Unknown does not mean cheat - it just is not on Modrinth/Megabase. Cheat hits are name matches; check them by hand.' -ForegroundColor DarkGray
+Wait-BeforeClose

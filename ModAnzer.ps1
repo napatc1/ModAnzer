@@ -45,6 +45,16 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+
+# If anything goes wrong, show the error and keep the window open instead of closing.
+trap {
+    Write-Host
+    Write-Host 'ModAnzer stopped because of an error:' -ForegroundColor Red
+    Write-Host $_.Exception.Message -ForegroundColor Red
+    Write-Host ("(line {0})" -f $_.InvocationInfo.ScriptLineNumber) -ForegroundColor DarkGray
+    if (-not $NoPause) { Read-Host 'Press Enter to close' | Out-Null }
+    exit 1
+}
 $ProgressPreference    = 'SilentlyContinue'
 try { [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 } catch {}
 Add-Type -AssemblyName System.IO.Compression
